@@ -20,7 +20,7 @@ class Function(AType):
         return f"{self.name}({','.join(self.vars)})={self.expr}"
 
 class FunctionList(Function):
-    pattern = r"[a-zA-Z]+\(.+\)"
+    pattern = r"fun[a-zA-Z]+\(.+\)"
 
     def __init__(self, expr: str, vars: List[str],  name: str = "anonymouse") -> None:
         from ..executor import infix_to_postfix
@@ -55,4 +55,5 @@ class FunctionList(Function):
             else:
                 return(m.group())
         result = re.sub(r"[a-zA-Z]+", f, self.expr)
+        result = re.sub(r"([+\-*%/])", r" \1 ", result)
         return result.strip()

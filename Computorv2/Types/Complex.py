@@ -103,9 +103,9 @@ class Complex(AType):
             res += f"{self.re:g}"
         if (self.im):
             if self.re:
-                res += f"{self.im:+g}i"
+                res += f" {self.im:+g}i"
             else:
-                res += f"{self.im:g}i"
+                res += f" {self.im:g}i"
         return res
     
     @staticmethod

@@ -5,7 +5,6 @@ from .Function import FunctionList
 from .Complex import Complex
 from .Function import Function
 from ..exceptions import ComputerV2Exception
-from ..globals import operators
 from enum import auto
 
 
@@ -199,6 +198,7 @@ class Polynomial:
     
     @classmethod
     def _eval_postfix(self, postfix):
+        from ..globals import operators
         deq = deque()
 
         for elem in postfix:

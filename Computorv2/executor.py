@@ -10,9 +10,9 @@ from .Types.Polynomial_degree1 import Polynomial_degree1
 from .Types.Polynomial_degree2 import Polynomial_degree2
 
 from .exceptions import ComputerV2Exception
-from .globals import operators, builtin_functions, EvaluationDirection, user_defined_variables
 
 def negative_sign_handler(expression: str) -> str:
+    from .globals import operators
     ops = ""
     for op in operators:
         if operators[op]["precedence"] > 0:
@@ -48,6 +48,7 @@ def preprocess_expression(expression: str) -> str:
 
 def infix_to_postfix(expression: str) -> list:
     from .Types.Matrix import Matrix
+    from .globals import operators, user_defined_variables, builtin_functions, EvaluationDirection
     variable_type = [Imaginary, Real, Matrix]
     variable_patterns = [var.pattern for var in variable_type] # [Imaginary.pattern, Real.pattern, Complex.pattern]
     operator_patterns = ["\\" + e for e in operators]
@@ -122,14 +123,13 @@ def infix_to_postfix(expression: str) -> list:
 
 
 def evalute_postfix(expression: list):
+    from .globals import operators
     result = deque()
     if not expression:
         raise ComputerV2Exception("Empty expression")
     
     for token in expression:
         if (token in operators):
-            if (len(result) < 2):
-                raise ComputerV2Exception(f"Invalid number of arguments for operator {token}")
             right = result.pop()
             if (len(result) == 0): # if we are at the end of the expression
                 if (token == "+" or token == "-"):
@@ -144,23 +144,26 @@ def evalute_postfix(expression: list):
             except ZeroDivisionError:
                 raise ComputerV2Exception("Division by zero")
         elif isinstance(token, Function):
-            if (len(result) < token.varnum):
-                raise ComputerV2Exception(f"Invalid number of arguments for function {token}")
-            params = []
-            for _ in range(token.varnum):
-                params.append(result.pop())
-            result.append(token(*params))
+            if (len(expression) != 1):
+                if (len(result) < token.varnum):
+                    raise ComputerV2Exception(f"Invalid number of arguments for function {token}")
+                params = []
+                for _ in range(token.varnum):
+                    params.append(result.pop())
+                result.append(token(*params))
+            else:
+                return token
         elif (isinstance(token, AType)):
             result.append(token)
         else:
-            raise ComputerV2Exception(f"Invalid token: {token}")
+            raise ComputerV2Exception(f"Invalid variable {token}")
     
     if (len(result) != 1):
         raise ComputerV2Exception("Invalid expression")
     return result.pop()
 
 def evaluate_expression_str(expression: str):
-    return evalute_postfix(infix_to_postfix(expression))
+   return evalute_postfix(infix_to_postfix(expression))
 
 def evaluate_expression_wih_qm(expression: str):
     expr = expression.split("=")[0]
@@ -187,8 +190,10 @@ def evaluate_equation(expression: str):
         return Polynomial_degree2(polynomial_expression.coefs).solve()
     
 def evaluate_assignment(expression: str):
+    from .globals import user_defined_variables
     variable_name, value = expression.split("=")
     variable_name = (re.sub(r"\s+", "", variable_name)).lower()
+    
     if (not variable_name):
         raise ComputerV2Exception("Empty variable name")
     elif (variable_name == "i" or variable_name == "j"):
@@ -196,8 +201,7 @@ def evaluate_assignment(expression: str):
     elif (re.fullmatch(r"[a-zA-Z]+", variable_name)):
         result = evaluate_expression_str(value)
         user_defined_variables[variable_name] = result
-        return result
-    elif (m := re.fullmatch(r"([a-zA-Z]+)\((.+)\)", variable_name)):
+    elif (m := re.fullmatch(r"([a-zA-Z]+)\((.+)\)", variable_name)): # function definition
         variables = m.group(2).split(",")
         for var in variables:
             if (not re.fullmatch(r"[a-zA-Z]+", var)):
@@ -207,4 +211,5 @@ def evaluate_assignment(expression: str):
         result = list_of_functions.subvars()
     else:
         raise ComputerV2Exception(f"Invalid variable name: {variable_name}, variable names must be alphabetic characters")
+    return result
     

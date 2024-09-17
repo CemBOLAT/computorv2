@@ -9,12 +9,6 @@ class EvaluationDirection(Enum):
     NONE = auto()
 
 builtin_functions = {
-    # "abs": lambda x: Function(my_math._abs, "abs"),
-    # "pow": lambda x, n: Function(my_math._pow, "pow"),
-    # "max": lambda a, b: Function(my_math._max, "max"),
-    # "min": lambda a, b: Function(my_math._min, "min"),
-    # "delta": lambda a, b, c: Function(my_math._delta, "delta"),
-    # "sqrt": lambda x: Function(my_math.ft_sqrt, "sqrt"),
 
     "abs": Function(my_math._abs, "abs"),
     "pow": Function(my_math._pow, "pow"),
