@@ -1,0 +1,5 @@
+funA(x) = 2 * 4 + x
+funB(x) = 4 -5 + (x + 2)^2 - 4
+funC(x) = 4x + 5 - 2
+funA(2) + funB(4) = ?
+funC(3) = ?

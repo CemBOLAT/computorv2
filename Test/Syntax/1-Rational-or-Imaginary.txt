@@ -1,0 +1,4 @@
+varA = 2
+varB= 2 * (4 + varA + 3)
+varC =2 * varB
+varD = 2 *(2 + 4 *varC -4 /3)

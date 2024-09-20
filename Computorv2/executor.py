@@ -8,8 +8,8 @@ from .Types.AType import AType
 from .Types.Polynomial import Polynomial
 from .Types.Polynomial_degree1 import Polynomial_degree1
 from .Types.Polynomial_degree2 import Polynomial_degree2
-
 from .exceptions import ComputerV2Exception
+
 
 def negative_sign_handler(expression: str) -> str:
     from .globals import operators
@@ -19,7 +19,7 @@ def negative_sign_handler(expression: str) -> str:
             ops += "\\" + op
     
     return re.sub(f"([{ops}])-({Imaginary.pattern}|{Real.pattern}|{FunctionList.pattern}|[a-zA-Z]+)", r"\1(0-\2)", expression)
-        
+
 
 def parantheses_check(expression: str) -> bool:
     left_p, right_p = "{[(", "}])"
@@ -37,14 +37,19 @@ def parantheses_check(expression: str) -> bool:
         return False
     return True
 
+
 def preprocess_expression(expression: str) -> str:
     expression = re.sub(r"\s+", "", expression)
 
     if (not parantheses_check(expression)):
         raise ComputerV2Exception("Parantheses are not balanced")
+    
+    
     expression = re.sub(r"\*\*", ".", expression) # replace ** with . for power operator
+    expression = re.sub(r"(\d)([a-zA-Z])", r"\1 * \2", expression)
     expression = negative_sign_handler(expression)
     return expression.lower()
+
 
 def infix_to_postfix(expression: str) -> list:
     from .Types.Matrix import Matrix
@@ -61,7 +66,6 @@ def infix_to_postfix(expression: str) -> list:
     classed_tokens = []
     variable_patterns_list = list(enumerate(re.compile(p) for p in variable_patterns))
 
-    #types_regex = list(enumerate(re.compile(p) for p in types_patterns))
     for token in tokens:
         for i, pattern in variable_patterns_list:
             if pattern.fullmatch(token):
@@ -119,6 +123,7 @@ def infix_to_postfix(expression: str) -> list:
     
     while (len(stack) > 0):
         _list.append(stack.pop())
+
     return _list
 
 
@@ -158,25 +163,24 @@ def evalute_postfix(expression: list):
         else:
             raise ComputerV2Exception(f"Invalid variable {token}")
     
-    if (len(result) != 1):
-        raise ComputerV2Exception("Invalid expression")
     return result.pop()
+
 
 def evaluate_expression_str(expression: str):
    return evalute_postfix(infix_to_postfix(expression))
 
+
 def evaluate_expression_wih_qm(expression: str):
     expr = expression.split("=")[0]
-    if (expr[-1] != "?"):
-        raise ComputerV2Exception("Invalid expression")
-    expr = expr[:-1]
     result = evaluate_expression_str(expr)
     return result
+
 
 def evaluate_equation(expression: str):
     left, right = expression[:-1].split("=")
 
-    polynomial_expression = Polynomial_degree1.fromexpr(left) - Polynomial_degree1.fromexpr(right)
+    polynomial_expression = Polynomial.fromexpr(left) - Polynomial.fromexpr(right)
+    print("polynomial_expression", polynomial_expression)
 
     if (polynomial_expression.degree > 2):
         raise ComputerV2Exception("The polynomial degree is stricly greater than 2, I can't solve.")
@@ -189,6 +193,7 @@ def evaluate_equation(expression: str):
     if (polynomial_expression.degree == 2):
         return Polynomial_degree2(polynomial_expression.coefs).solve()
     
+
 def evaluate_assignment(expression: str):
     from .globals import user_defined_variables
     variable_name, value = expression.split("=")
@@ -212,4 +217,3 @@ def evaluate_assignment(expression: str):
     else:
         raise ComputerV2Exception(f"Invalid variable name: {variable_name}, variable names must be alphabetic characters")
     return result
-    

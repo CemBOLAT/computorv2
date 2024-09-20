@@ -1,5 +1,5 @@
 varA = 2 + 4 *2 - 5 %4 + 2 * (4 + 5)
 varB = 2 * varA - 5 %4
-funA(x) = varA + varB * 4 - 1 / 2 + x --> BUG FIX TIME
+funA(x) = varA + varB * 4 - 1 / 2 + x
 varC = 2 * varA - varB
 varD = funA(varC)

@@ -6,25 +6,29 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from TextEditor.TextEditor import TextEditor
 from Computorv2.parser import parser
+import traceback
 
 def main(prompt_session):
 
 	if len(sys.argv) > 1:
-		try:
-			with open(sys.argv[1], 'r') as f:
-				for line in f:
-					print(f"> {line}", end='')
-					result = parser(line)
-					if result:
-						TextEditor.print_colored(result, TextEditor.COLORS['green'])
-		except FileNotFoundError:
-			TextEditor.print_colored(f"File not found: {sys.argv[1]}", TextEditor.COLORS['red'])
-		except FileExistsError:
-			TextEditor.print_colored(f"File exists: {sys.argv[1]}", TextEditor.COLORS['red'])
-		except PermissionError:
-			TextEditor.print_colored(f"Permission denied: {sys.argv[1]}", TextEditor.COLORS['red'])
-		except Exception as e:
-			TextEditor.print_colored(e, TextEditor.COLORS['red'])
+		for fileName in sys.argv[1:]:
+			try:
+				with open(fileName, 'r') as f:
+					for line in f:
+						print(f"> {line}", end='')
+						result = parser(line)
+						if result:
+							TextEditor.print_colored(result, TextEditor.COLORS['green'])
+			except FileNotFoundError:
+				TextEditor.print_colored(f"File not found: {fileName}", TextEditor.COLORS['red'])
+			except FileExistsError:
+				TextEditor.print_colored(f"File exists: {fileName}", TextEditor.COLORS['red'])
+			except PermissionError:
+				TextEditor.print_colored(f"Permission denied: {fileName}", TextEditor.COLORS['red'])
+			except Exception as e:
+				TextEditor.print_colored(e, TextEditor.COLORS['red'])
+				traceback.print_exc()
+
 	
 	while True:
 		try:

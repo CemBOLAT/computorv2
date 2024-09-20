@@ -108,16 +108,16 @@ class Polynomial:
     def fromexpr(self, expr):
         from ..executor import infix_to_postfix
         rpn_list = infix_to_postfix(expr)
+        # for el in rpn_list:
+        #     print("el", el)
         # check if there is more than one variables
         if len(set([e for e in rpn_list if isinstance(e, str) and re.fullmatch(r"[a-zA-Z]+", e)])) > 1:
-            raise ComputerV2Exception(
-                "functions  with more than one variables are not supported")
+            raise ComputerV2Exception("Functions with more than one variables are not supported.")        
         i = 0
         while i < (len(rpn_list)):
             if isinstance(rpn_list[i], Function):
                 if not isinstance(rpn_list[i], FunctionList):
-                    raise ComputerV2Exception(
-                        "built in functions are not supported in equations")
+                    raise ComputerV2Exception("Built in functions are not supported in equations")
                 if i - 1 >= 0:
                     rpn_list[i] = self.fromfunc(rpn_list[i])
 
@@ -131,15 +131,13 @@ class Polynomial:
     def fromfunc(self, func):
         if (not isinstance(func, FunctionList)):
             raise ComputerV2Exception("Function must be a FunctionList")
-        if (len(func.args) != 1):
+        if (len(func.vars) > 1):
             raise ComputerV2Exception("Function must have only one argument")
 
-        rpn_list = func.rpn_list
+        rpn_list = func.rpn_list.copy()
         for i in range(len(rpn_list)):
             if type(rpn_list[i]) is str and rpn_list[i].isnumeric():
                 rpn_list[i] = "x"
-            else:
-                raise ComputerV2Exception("Function must be a polynomial")
         return self._eval_postfix(rpn_list)
 
 
@@ -212,7 +210,7 @@ class Polynomial:
                             f"operator {elem} needs 2 oprands got 1")
                 else:
                     a = deq.pop()
-                deq.append(operators[elem]["func"](a, b))
+                deq.append(operators[elem]["function"](a, b))
             elif isinstance(elem, Function):
                 if (len(deq) < elem.varnum):
                     raise ComputerV2Exception(f"Function {elem.name} needs {elem.varnum} operands")
