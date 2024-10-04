@@ -5,7 +5,6 @@ import selectors
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 from TextEditor.TextEditor import TextEditor
-from Computorv2.parser import parser
 
 def main(prompt_session):
 
@@ -14,7 +13,8 @@ def main(prompt_session):
 			with open(sys.argv[1], 'r') as f:
 				for line in f:
 					print(f"> {line}", end='')
-					result = parser(line)
+					#result = parser(line)
+					result = line
 					if result:
 						TextEditor.print_colored(result, TextEditor.COLORS['green'])
 		except FileNotFoundError:
@@ -36,9 +36,7 @@ def main(prompt_session):
 		else:
 			try:
 				if (text):
-				    # computorv.eval_input(l)
-					# print(res)
-					result = parser(text)
+					result = text
 					if result:
 						TextEditor.print_colored(result, TextEditor.COLORS['green'])
 
