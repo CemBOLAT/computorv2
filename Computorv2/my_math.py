@@ -1,4 +1,3 @@
-from .Types.Complex import Real
 
 def _abs(x):
     return x if x >= 0 else -x
@@ -32,16 +31,16 @@ def _sqrt(number):
         guess = new_guess
 
 
-def ft_sqrt(x: Real):
-    return Real(_sqrt(x.re))
+# def ft_sqrt(x: Real):
+#     return Real(_sqrt(x.re))
 
 
-def _max(a: Real, b: Real):
-    return (a if a > b else b)
+# def _max(a: Real, b: Real):
+#     return (a if a > b else b)
 
 
-def _min(a: Real, b: Real):
-    return (a if a < b else b)
+# def _min(a: Real, b: Real):
+#     return (a if a < b else b)
 
-def _delta(a: Real, b: Real, c: Real):
-    return _pow(b.re, 2) - 4 * a.re * c.re
+# def _delta(a: Real, b: Real, c: Real):
+#     return _pow(b.re, 2) - 4 * a.re * c.re
