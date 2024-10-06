@@ -15,6 +15,7 @@ def main(prompt_session):
 				for line in f:
 					print(f"> {line}", end='')
 					line = line.strip()
+					#print(f"Result: {parser(line)}")
 					result = parser(line)
 					if result:
 						TextEditor.print_colored(result, TextEditor.COLORS['green'])

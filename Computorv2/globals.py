@@ -28,6 +28,7 @@ class TokenType(Enum):
     IMAGINARY = auto()
 
 token_patterns = [
+    (r"\*\*", TokenType.OP_MATRICE_MULTIPLY),
     (r"i", TokenType.IMAGINARY),
     (r"var", TokenType.KW_VAR),
     (r"fun", TokenType.KW_FUNC),
@@ -41,7 +42,6 @@ token_patterns = [
     (r"\*", TokenType.OP_MULTIPLY),
     (r"\/", TokenType.OP_DIVIDE),
     (r"\%", TokenType.OP_MODULO),
-    (r"\*\*", TokenType.OP_MATRICE_MULTIPLY),
     (r"\^", TokenType.OP_POWER),
     (r",", TokenType.OP_COLON),
     (r";", TokenType.OP_SEMICOLON),

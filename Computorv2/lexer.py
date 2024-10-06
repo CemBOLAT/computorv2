@@ -42,9 +42,6 @@ class Lexer():
         matrice_operators = [TokenType.OP_COLON, TokenType.OP_SEMICOLON]
         imaginary = [TokenType.IMAGINARY]
 
-        print(self.tokens)
-
-
         for i, (token, token_type) in enumerate(self.tokens):
             if token_type in open_parenthesis:
                 stack.append(token_type)
@@ -70,7 +67,7 @@ class Lexer():
                 # Operatör son token olamaz
                 if i == len(self.tokens) - 1:
                     raise ComputerV2Exception(f"Operator {token} cannot be the last token.")
-                elif i == 0:
+                elif i == 0 and token_type != TokenType.OP_MINUS:
                     # Operatör ilk token olamaz
                     raise ComputerV2Exception(f"Operator {token} cannot be the first token.")
                 # Arka arkaya iki operatör olamaz
@@ -100,6 +97,9 @@ class Lexer():
                 # Imaginary tek başına olabilir veya son token olabilir
                 if i > 0 and self.tokens[i - 1][1] not in (operators + types) and i != len(self.tokens) - 1:
                     raise ComputerV2Exception(f"Invalid token before imaginary {token}.")
+                #Bir önceki token bir tip ise, tip ile imaginary arasına * işareti ekle
+                if i > 0 and self.tokens[i - 1][1] in types:
+                    self.tokens.insert(i, ("*", TokenType.OP_MULTIPLY))
             
         # Tek bir eşittir ve soru işareti olmalı
         if equalSign > 1:
