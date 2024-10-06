@@ -15,7 +15,6 @@ class Parser:
 
     def parse(self):
         # İlk olarak var<id> = <expression>, <id> = <expression> ya da <expression> olup olmadığını kontrol et
-        print("e", self.tokens[self.pos][1])
         if self.tokens[self.pos][1] == TokenType.KW_VAR:
             return self.parse_var_assignment()
         elif self.tokens[self.pos][1] == TokenType.IDENTIFIER and self.peek_next_token_type() == TokenType.SIGN_EQUAL:
@@ -72,6 +71,8 @@ class Parser:
             raise ComputerV2Exception("Expected variable name after 'var' keyword.")
         variable = self.tokens[self.pos][0]
         self.pos += 2  # <id> ve = işaretini atla
+        if self.pos >= len(self.tokens):
+            raise ComputerV2Exception("Expected expression after '='.")
         expression = self.parse_expression()
         return ('var_assignment', variable, expression)
 
@@ -230,7 +231,7 @@ def parser(line:str) -> list:
     if not lexer.tokens:
         raise ComputerV2Exception("No tokens found.")
     
-    test = True
+    test = False
 
     if test:
         print("Lexer ok")
