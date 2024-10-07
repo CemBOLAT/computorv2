@@ -29,14 +29,18 @@ class Parser:
                     # Eğer parametre bir değişkense (IDENTIFIER), onu user_defined_variables içinde kontrol edin
                     if self.tokens[self.pos + 3][1] == TokenType.IDENTIFIER:
                         if self.tokens[self.pos + 3][0] in user_defined_variables:
-                            return self.parse_function_call()
+                            return self.parse_expression()
                         else:
                             return self.parse_function_definition()
                     # Değişken değilse (örneğin INTEGER), doğrudan parse_function_call yap
-                    return self.parse_function_call()
+                    return self.parse_expression()
 
             return self.parse_function_definition()
-
+        elif self.tokens[self.pos][1] == TokenType.SIGN_QMARK and self.tokens[self.pos - 1][1] == TokenType.SIGN_EQUAL:
+            # delete the last two tokens
+            del self.tokens[self.pos - 1]
+            del self.tokens[self.pos - 1]
+            return self.parse_expression()
         else:
             return self.parse_expression()
 
@@ -61,7 +65,7 @@ class Parser:
             raise ComputerV2Exception("Expected ')' after parameter.")
         self.pos += 1  # Parantezi atla
         
-        return ('function_call', function_name, param)
+        return (('function_call', function_name, param), self.parse())
 
 
     def parse_var_assignment(self):
@@ -70,9 +74,11 @@ class Parser:
         if self.pos >= len(self.tokens):
             raise ComputerV2Exception("Expected variable name after 'var' keyword.")
         variable = self.tokens[self.pos][0]
-        self.pos += 2  # <id> ve = işaretini atla
+        self.pos += 1  # <id> ve = işaretini atla
         if self.pos >= len(self.tokens):
-            raise ComputerV2Exception("Expected expression after '='.")
+            self.pos -= 1
+            return self.parse_expression()
+        self.pos += 1
         expression = self.parse_expression()
         return ('var_assignment', variable, expression)
 
@@ -231,13 +237,13 @@ def parser(line:str) -> list:
     if not lexer.tokens:
         raise ComputerV2Exception("No tokens found.")
     
-    test = False
+    test = True
 
     if test:
         print("Lexer ok")
     lexer.is_valid()
     if test:
-        print("Lexer valid")
+        print("Lexer valid", lexer.tokens)
     parser = Parser(lexer.tokens)
     if test:
         print("Parser ok", parser)

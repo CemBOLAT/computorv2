@@ -31,6 +31,7 @@ class Expander:
             # Fonksiyonu kaydet
             user_defined_functions[node[1]] = (node[2], node[3])
         elif node[0] == 'function_call':
+            print("eNTERED")
             func_name, arg_expr = node[1], node[2]
             if func_name in user_defined_functions:
                 param, body = user_defined_functions[func_name]

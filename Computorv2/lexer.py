@@ -56,6 +56,9 @@ class Lexer():
                 if i == 0:
                     # Eşittir işareti ilk token olamaz
                     raise ComputerV2Exception(f"Equal sign {token} cannot be the first token.")
+                if i == len(self.tokens) - 1:
+                    # Eşittir işareti son token olamaz
+                    raise ComputerV2Exception(f"Equal sign {token} cannot be the last token.")
             elif token_type == TokenType.SIGN_QMARK:
                 # Soru işareti en son olmalı
                 if i != len(self.tokens) - 1:
@@ -74,8 +77,10 @@ class Lexer():
                 if self.tokens[i + 1][1] in operators:
                     raise ComputerV2Exception(f"Invalid consecutive operators {token} and {self.tokens[i + 1][0]}.")
             elif token_type in types:
-                # Tip son token olabilir ve tipten sonra tip gelebilir (örneğin: 4 * 5 veya 4 5)
-                pass
+                # bir önceki terim de type ise arasına * işareti ekle
+                if i > 0 and self.tokens[i - 1][1] in types:
+                    self.tokens.insert(i, ("*", TokenType.OP_MULTIPLY))
+                    
             elif token_type in keywords:
                 # Keyword sonrasında identifier olmalı
                 if i + 1 == len(self.tokens) or self.tokens[i + 1][1] != TokenType.IDENTIFIER:
