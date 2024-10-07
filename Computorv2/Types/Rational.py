@@ -73,6 +73,47 @@ class Rational:
         elif isinstance(other, (int, float)):
             return Rational(self.value % other)
         raise TypeError("Unsupported operation between Rational and non-Rational")
+    
+    def __eq__(self, other):
+        if isinstance(other, Rational):
+            return self.value == other.value
+        elif isinstance(other, (int, float)):
+            return self.value == other
+        return False
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    def __lt__(self, other):
+        if isinstance(other, Rational):
+            return self.value < other.value
+        elif isinstance(other, (int, float)):
+            return self.value < other
+        return False
+    
+    def __le__(self, other):
+        return self.__lt__(other) or self.__eq__(other)
+    
+    def __gt__(self, other):
+        return not self.__le__(other)
+    
+    def __ge__(self, other):
+        return not self.__lt__(other)
+    
+    def __neg__(self):
+        return Rational(-self.value)
+    
+    def __pos__(self):
+        return Rational(self.value)
+    
+    def __abs__(self):
+        return Rational(abs(self.value))
+    
+    def __int__(self):
+        return int(self.value)
+    
+    def __float__(self):
+        return float(self.value)
 
     def __str__(self):
         return str(self.value)

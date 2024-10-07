@@ -6,7 +6,11 @@ from .expander import Expander
 from .executer import Executer
 from .globals import TokenType
 from .Types.Imaginary import Imaginary
+from .Types.Symbol import Symbol
+from .Types.Equation import Equation
 import re
+import math
+from .Types.Rational import Rational
 
 class Parser:
     def __init__(self, tokens):
@@ -19,6 +23,14 @@ class Parser:
             return self.parse_var_assignment()
         elif self.tokens[self.pos][1] == TokenType.IDENTIFIER and self.peek_next_token_type() == TokenType.SIGN_EQUAL:
             return self.parse_assignment()
+        elif self.tokens[len(self.tokens) - 1][1] == TokenType.SIGN_QMARK and self.tokens[len(self.tokens) - 2][1] == TokenType.SIGN_EQUAL:
+            # delete the last two tokens
+            del self.tokens[self.pos - 1]
+            del self.tokens[self.pos - 1]
+            return self.parse_expression()
+        # son tokende ? ve bir öncesidne IDENTIFIER varsa bu bir polinomdur
+        elif self.tokens[len(self.tokens) - 1][1] == TokenType.SIGN_QMARK:
+            return self.parse_polynomial()
         elif self.tokens[self.pos][1] == TokenType.KW_FUNC:
             # KW_FUNC, IDENTIFIER, LPAREN, NUMBER|IMAGINARY, RPAREN > function call
 
@@ -36,13 +48,130 @@ class Parser:
                     return self.parse_expression()
 
             return self.parse_function_definition()
-        elif self.tokens[self.pos][1] == TokenType.SIGN_QMARK and self.tokens[self.pos - 1][1] == TokenType.SIGN_EQUAL:
-            # delete the last two tokens
-            del self.tokens[self.pos - 1]
-            del self.tokens[self.pos - 1]
-            return self.parse_expression()
         else:
             return self.parse_expression()
+        
+    def collect_coefficients(self, expr, symbol_name):
+        """
+        Recursively collect coefficients for x^2, x, and constant terms from an expression.
+        Returns a tuple (a, b, c) for ax^2 + bx + c.
+        Raises an exception if an exponent greater than 2 is encountered.
+        """
+        if expr[0] == 'num':
+            return 0, 0, expr[1]  # Constant term
+        elif expr[0] == 'var' and expr[1] == symbol_name:
+            return 0, 1, 0  # Linear term
+        elif expr[0] == 'binary_op':
+            op = expr[1]
+            left_a, left_b, left_c = self.collect_coefficients(expr[2], symbol_name)
+            right_a, right_b, right_c = self.collect_coefficients(expr[3], symbol_name)
+            
+            if op == '+':
+                return left_a + right_a, left_b + right_b, left_c + right_c
+            elif op == '-':
+                return left_a - right_a, left_b - right_b, left_c - right_c
+            elif op == '*':
+                # Detecting quadratic terms and linear terms
+                if expr[2][0] == 'num' and expr[3][0] == 'var' and expr[3][1] == symbol_name:
+                    return 0, expr[2][1], 0  # Linear term
+                elif expr[3][0] == 'num' and expr[2][0] == 'var' and expr[2][1] == symbol_name:
+                    return 0, expr[3][1], 0  # Linear term
+                elif expr[2][0] == 'binary_op' and expr[2][1] == '^' and expr[2][2][1] == symbol_name:
+                    if expr[2][3][0] == 'num' and expr[2][3][1] > 2:
+                        raise ComputerV2Exception("Polynomial terms with exponents greater than 2 are not supported.")
+                    return expr[3][1], 0, 0  # Quadratic term
+                elif expr[3][0] == 'binary_op' and expr[3][1] == '^' and expr[3][2][1] == symbol_name:
+                    if expr[3][3][0] == 'num' and expr[3][3][1] > 2:
+                        raise ComputerV2Exception("Polynomial terms with exponents greater than 2 are not supported.")
+                    return expr[2][1], 0, 0  # Quadratic term
+            elif op == '^':
+                if expr[2][0] == 'var' and expr[3][0] == 'num':
+                    exponent = expr[3][1]
+                    if exponent != 2 and exponent != 1 and exponent != 0:
+                        raise ComputerV2Exception("Only polynomials with exponents 0, 1, and 2 are supported.")
+                    elif exponent == 2:
+                        return 1, 0, 0  # Quadratic term
+                    elif exponent == 1:
+                        return 0, 1, 0  # Linear term
+                    else:  # exponent == 0
+                        return 0, 0, 1  # This essentially makes it a constant term
+        return 0, 0, 0
+    
+    def parse_polynomial(self):
+        if len(self.tokens) < 8:
+            raise ComputerV2Exception("Invalid polynomial expression.")
+        # Remove the question mark '?'
+        self.tokens.pop()
+
+        # Retrieve the function name
+        function_name_token = self.tokens[1]
+        function_name = function_name_token[0]
+
+        # Check if the function is defined
+        if function_name not in user_defined_functions:
+            raise ComputerV2Exception(f"Function {function_name} is not defined.")
+        
+        # Move position to target value location
+        self.pos = 6
+        target_value_expr = self.parse_expression()
+
+        target_value_expr = Expander().expand(target_value_expr)
+
+
+        target_value_expr = Executer().execute(target_value_expr)
+
+        # Get function definition and unpack parameter and expression
+        func_definition = user_defined_functions[function_name]
+        param_name, body_expr = func_definition
+
+        # Parse the target value expression (either as a variable or constant)
+        target_value = target_value_expr
+
+        # Verify polynomial degree and collect coefficients
+        a, b, c = self.collect_coefficients(body_expr, param_name)
+        a = Rational(a)
+        b = Rational(b)
+        c = Rational(c)
+        if a > 2:
+            raise ComputerV2Exception("Only polynomials of degree 2 or lower are supported.")
+
+        # Solve the polynomial ax^2 + bx + (c - target_value) = 0
+        solutions = self.solve_polynomial(a, b, c - target_value)
+        
+        solutionsRet = []
+
+        for solution in solutions:
+            if isinstance(solution, Imaginary):
+                solutionsRet.append(f"{solution.real_part} + {solution.imag_part}i")
+            else:
+                solutionsRet.append(str(solution))
+        
+        return ('solutions', solutions)
+
+    def solve_polynomial(self, a, b, c):
+        """
+        Solves a polynomial of the form ax^2 + bx + c = 0.
+        Returns a list of solutions.
+        """
+        # Check if it's a linear equation (a = 0)
+        if a == 0:
+            if b == 0:
+                return [] if c != 0 else ["All real numbers"]  # No solution or all solutions
+            return [-c / b]  # Linear solution
+
+        # Quadratic solution
+        Rational_2 = Rational(2)
+        Rational_4 = Rational(4)
+        discriminant = b ** Rational_2 - Rational_4 * a * c
+        if discriminant < 0:
+            solution1 = Imaginary(-b, math.sqrt(-discriminant)) / (Rational_2 * a)
+            solution2 = Imaginary(-b, -math.sqrt(-discriminant)) / (Rational_2 * a)
+            return [solution1, solution2]
+        elif discriminant == 0:
+            return [-b / (Rational_2 * a)]  # Single solution
+        else:
+            sqrt_disc = math.sqrt(discriminant)
+            return [(-b + sqrt_disc) / (Rational_2 * a), (-b - sqrt_disc) / (Rational_2 * a)]
 
 
     def parse_function_call(self):
@@ -65,7 +194,7 @@ class Parser:
             raise ComputerV2Exception("Expected ')' after parameter.")
         self.pos += 1  # Parantezi atla
         
-        return (('function_call', function_name, param), self.parse())
+        return (('function_call', function_name, param))
 
 
     def parse_var_assignment(self):
@@ -120,7 +249,7 @@ class Parser:
 
     def parse_expression(self):
         left = self.parse_term()  # İlk terimi al
-
+        
         while self.pos < len(self.tokens):
             token, token_type = self.tokens[self.pos]
 
@@ -237,7 +366,7 @@ def parser(line:str) -> list:
     if not lexer.tokens:
         raise ComputerV2Exception("No tokens found.")
     
-    test = True
+    test = False
 
     if test:
         print("Lexer ok")
@@ -248,6 +377,16 @@ def parser(line:str) -> list:
     if test:
         print("Parser ok", parser)
     tokens = parser.parse()
+    if (isinstance(tokens, tuple) and tokens[0] == 'solutions'):
+        # Number of solutions
+        n = len(tokens[1])
+        if n == 0:
+            return "No real solutions"
+        elif n == 1:
+            return f"Single solution: {tokens[1][0]}"
+        else:
+            return f"Two solutions: {tokens[1][0]} and {tokens[1][1]}"
+        
     if test:
         print("Parser valid", tokens)
     expander = Expander()

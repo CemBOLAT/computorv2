@@ -36,7 +36,6 @@ class Matrix:
 
     def __mul__(self, other):
         if isinstance(other, Matrix):
-            print(len(self.rows[0]), len(other.rows))
             if len(self.rows[0]) != len(other.rows):
                 raise ValueError("Matrix dimensions are not aligned for multiplication")
             result = []

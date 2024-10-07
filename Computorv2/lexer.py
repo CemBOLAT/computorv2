@@ -63,8 +63,6 @@ class Lexer():
                 # Soru işareti en son olmalı
                 if i != len(self.tokens) - 1:
                     raise ComputerV2Exception(f"Question mark {token} must be the last token.")
-                if i > 0 and (self.tokens[i - 1][1] != TokenType.SIGN_EQUAL and self.tokens[i - 1][1] != TokenType.IDENTIFIER):
-                    raise ComputerV2Exception(f"Question mark {token} must be preceded by an equal sign or an identifier.")
                 questionMark += 1
             elif token_type in operators:
                 # Operatör son token olamaz

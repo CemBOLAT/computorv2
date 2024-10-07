@@ -1,2 +1,8 @@
-varA = [[2,3];[4,3]]
+varA = [[2,3];[4,3]]        
 varB = [[3,4]]
+varC = [[2,3];[4,3];[2,3];[121,0]]
+varEq = [[33,44];[54,23]]
+varCorrect = varA ** varEq
+varCorrect = varA + varEq
+varCorrect = varA - varEq
+varCorrect = 23 * varA

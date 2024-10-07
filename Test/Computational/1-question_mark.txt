@@ -1,2 +1,7 @@
 a = 2 * 4 + 4
 a + 2 = ?
+funA(x) = 3a + a * 4 - 1 / 2 + x
+funA(2) = ?
+funB(y) = 5a + a * 4 - 1 / 2 + y
+funB(2) = ?
+funA(2) + funB(2) = ?

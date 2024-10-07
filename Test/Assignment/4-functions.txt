@@ -1,3 +1,9 @@
 funA(x) = 2*x^5 + 4x^2 - 5*x + 4
 funB(y) = 43 * y / (4 % 2 * y)
 funC(z) = -2 * z - 5
+funD(a) = 2 * a + 3
+funE(b) = -4 * b - 4
+varA = funD(2) * i + funD(3)
+varB = funE(4) * i + funE(4)
+varC = funD(2) * i + funD(3)
+varD = varA + varB

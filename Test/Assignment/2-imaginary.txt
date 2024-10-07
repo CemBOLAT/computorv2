@@ -1,2 +1,12 @@
 varA = 2*i + 3
 varB = -4i - 4
+varC = 2i + 3
+varD = varA + varB
+varE = varA * varC
+varF = varB / varC
+varG = varA - varB + varC
+varH = varA + varC
+varB = varB + varA + varC + varD + varE + varF + varG + varH
+varB
+varA = varB ^ 2
+varC = varB ** 2
