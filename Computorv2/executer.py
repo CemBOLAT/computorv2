@@ -97,17 +97,38 @@ class Executer:
             param = self.execute(node[2])  # Parametreyi çözümle
             return self.execute_function_call(function_name, param)
         elif isinstance(node, tuple) and node[0] == 'sin':
-            return sin(self.execute(node[1]))
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for sin function: {result}")
+            print("type of result: ", type(result))
+            return sin(result)
         elif isinstance(node, tuple) and node[0] == 'cos':
-            return cos(self.execute(node[1]))
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for cos function: {result}")
+            return cos(result)
         elif isinstance(node, tuple) and node[0] == 'tan':
-            return tan(self.execute(node[1]))
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for tan function: {result}")
+            return tan(result)
         elif isinstance(node, tuple) and node[0] == 'cot':
-            return 1.0 / tan(self.execute(node[1]))
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for cot function: {result}")
+            return 1.0 / result
         elif isinstance(node, tuple) and node[0] == 'sqrt':
-            return sqrt(self.execute(node[1]))
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for sqrt function: {result}")
+            if result < 0:
+                raise ComputerV2Exception("Square root of a negative number is not allowed.")
+            return sqrt(result)
         elif isinstance(node, tuple) and node[0] == 'abs':
-            return _abs(self.execute(node[1]))
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for abs function: {result}")
+            return _abs(result)
         else:
             return node  # Sayı, Imaginary, Matrix, Rational ya da değişken olursa olduğu gibi döndür
 
