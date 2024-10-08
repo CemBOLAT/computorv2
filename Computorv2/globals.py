@@ -3,7 +3,6 @@ from enum import Enum, auto
 user_defined_variables = {}
 user_defined_functions = {}
 
-
 class TokenType(Enum):
     FLOAT = auto()
     INTEGER = auto()
@@ -26,8 +25,24 @@ class TokenType(Enum):
     SIGN_EQUAL = auto()
     SIGN_QMARK = auto()
     IMAGINARY = auto()
+    KW_LIST = auto()
+    KW_PRINT_HISTORY = auto()
+    KW_SIN = auto()
+    KW_COS = auto()
+    KW_TAN = auto()
+    KW_COT = auto()
+    KW_SQRT = auto()
+    KW_ABS = auto()
 
 token_patterns = [
+    (r":history", TokenType.KW_PRINT_HISTORY),
+    (r":list", TokenType.KW_LIST),
+    (r"cot", TokenType.KW_COT),
+    (r"tan", TokenType.KW_TAN),
+    (r"cos", TokenType.KW_COS),
+    (r"sin", TokenType.KW_SIN),
+    (r"sqrt", TokenType.KW_SQRT),
+    (r"abs", TokenType.KW_ABS),
     (r"\*\*", TokenType.OP_MATRICE_MULTIPLY),
     (r"i", TokenType.IMAGINARY),
     (r"var", TokenType.KW_VAR),

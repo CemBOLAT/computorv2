@@ -27,30 +27,36 @@ class Parser:
             # delete the last two tokens
             del self.tokens[self.pos - 1]
             del self.tokens[self.pos - 1]
-            return self.parse_expression()
+            return self.parse()
+        elif self.tokens[self.pos][1] == TokenType.KW_LIST:
+            return self.parse_variables_and_functions()
         # son tokende ? ve bir öncesidne IDENTIFIER varsa bu bir polinomdur
         elif self.tokens[len(self.tokens) - 1][1] == TokenType.SIGN_QMARK:
             return self.parse_polynomial()
         elif self.tokens[self.pos][1] == TokenType.KW_FUNC:
-            # KW_FUNC, IDENTIFIER, LPAREN, NUMBER|IMAGINARY, RPAREN > function call
-
-            # Liste uzunluğu yeterli mi?
-            if len(self.tokens) > self.pos + 4:
-                if self.tokens[self.pos + 1][1] == TokenType.IDENTIFIER and self.tokens[self.pos + 2][1] == TokenType.LPAREN and self.tokens[self.pos + 3][1] in (TokenType.INTEGER, TokenType.FLOAT, TokenType.IDENTIFIER, TokenType.IMAGINARY) and self.tokens[self.pos + 4][1] == TokenType.RPAREN:
-                    
-                    # Eğer parametre bir değişkense (IDENTIFIER), onu user_defined_variables içinde kontrol edin
-                    if self.tokens[self.pos + 3][1] == TokenType.IDENTIFIER:
-                        if self.tokens[self.pos + 3][0] in user_defined_variables:
-                            return self.parse_expression()
-                        else:
-                            return self.parse_function_definition()
-                    # Değişken değilse (örneğin INTEGER), doğrudan parse_function_call yap
-                    return self.parse_expression()
-
-            return self.parse_function_definition()
+            # KW_FUNC, IDENTIFIER, LPAREN, IDENTIFIER, RPAREN ve eşittir işareti -> function definition
+            if len(self.tokens) > self.pos + 5 and self.tokens[self.pos + 1][1] == TokenType.IDENTIFIER and self.tokens[self.pos + 2][1] == TokenType.LPAREN and self.tokens[self.pos + 3][1] == TokenType.IDENTIFIER and self.tokens[self.pos + 4][1] == TokenType.RPAREN and self.tokens[self.pos + 5][1] == TokenType.SIGN_EQUAL:
+                return self.parse_function_definition()
+            # Eğer IDENTIFIER ve parantez var ise (function call)
+            elif len(self.tokens) > self.pos + 2 and self.tokens[self.pos + 1][1] == TokenType.IDENTIFIER and self.tokens[self.pos + 2][1] == TokenType.LPAREN:
+                return self.parse_function_call()
+            elif self.peek_next_token_type() == TokenType.IDENTIFIER:
+                # return the variable value
+                key = self.tokens[self.pos + 1][0]
+                # eğer key yoksa hata ver
+                if key not in user_defined_functions:
+                    raise ComputerV2Exception(f"Undefined variable {key}.")
+                variable_tuple = user_defined_functions[self.tokens[self.pos + 1][0]]
+                tuple_creation = ('function_def', key, variable_tuple[0], variable_tuple[1])
+                return tuple_creation
+            
         else:
             return self.parse_expression()
         
+    def parse_variables_and_functions(self):
+        # return all saved variables and functions from user_defined_variables and user_defined_functions
+        return ('variables_and_functions', user_defined_variables, user_defined_functions)
+
     def collect_coefficients(self, expr, symbol_name):
         """
         Recursively collect coefficients for x^2, x, and constant terms from an expression.
@@ -344,15 +350,87 @@ class Parser:
             elif self.tokens[self.pos][1] == TokenType.IMAGINARY:
                 self.pos += 1
                 return ('imaginary', Imaginary(0, -1))  # Negatif hayali sayıyı döndür
+        elif token_type == TokenType.KW_SIN:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'sin' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('sin', expr)
+        elif token_type == TokenType.KW_COS:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'cos' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('cos', expr)
+        elif token_type == TokenType.KW_TAN:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'tan' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('tan', expr)
+        elif token_type == TokenType.KW_COT:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'cot' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('cot', expr)
+        elif token_type == TokenType.KW_SQRT:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'sqrt' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('sqrt', expr)
+        elif token_type == TokenType.KW_ABS:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'abs' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('abs', expr)
         else:
             raise ComputerV2Exception(f"Unexpected token {token}.")
-
+    
     def peek_next_token_type(self):
         # Sonraki token tipini kontrol et
         if self.pos + 1 < len(self.tokens):
             return self.tokens[self.pos + 1][1]
         return None
 
+def print_whole_history(number_of_history:int):
+    str_history = ""
+    # with open(".computorv2_history_result", "r") as file:
+    #     str_history = file.read()
+    
+    # read last number_of_history lines
+    with open(".computorv2_history_result", "r") as file:
+        lines = file.readlines()
+        for line in lines[-number_of_history:]:
+            str_history += line
+
+    return str_history
 
 def parser(line:str) -> list:
     """
@@ -386,7 +464,11 @@ def parser(line:str) -> list:
             return f"Single solution: {tokens[1][0]}"
         else:
             return f"Two solutions: {tokens[1][0]} and {tokens[1][1]}"
-        
+    if (lexer.tokens[0][1] == TokenType.KW_PRINT_HISTORY):
+        if len(lexer.tokens) == 1:
+            return print_whole_history(1)
+        else:
+            return print_whole_history(int(lexer.tokens[1][0]))
     if test:
         print("Parser valid", tokens)
     expander = Expander()

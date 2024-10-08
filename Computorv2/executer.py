@@ -1,10 +1,30 @@
 from .Types.Imaginary import Imaginary
 from .Types.Matrix import Matrix
-from .Types.Rational import Rational
+from .Types.Rational import Rational, String
 from .globals import user_defined_variables
+from .globals import user_defined_variables, user_defined_functions
+from .exceptions import ComputerV2Exception
+from math import sin, cos, tan, sqrt
+from .my_math import _abs
 
 class Executer:
     def execute(self, node):
+        if isinstance(node, tuple) and node[0] == 'variables_and_functions':
+            # Değişkenleri ve fonksiyonları stringe kaydet
+            variables_and_functions = ""
+            variable_keys = list(user_defined_variables.keys())
+            varialbe_values = list(user_defined_variables.values())
+            for i in range(len(variable_keys)):
+                variables_and_functions += f"{variable_keys[i]} = {varialbe_values[i]}\n"
+            function_keys = list(user_defined_functions.keys())
+            function_values = list(user_defined_functions.values())
+            for i in range(len(function_keys)):
+                variables_and_functions += f"{function_keys[i]} = {self.expression_from_node(function_values[i][1])}\n"
+
+            variables_and_functions = variables_and_functions.strip()
+            return variables_and_functions
+
+
         if isinstance(node, tuple) and node[0] in ('+', '-', '*', '/', '**', '%', '^'):
             left = self.execute(node[1])
             right = self.execute(node[2])
@@ -14,14 +34,27 @@ class Executer:
                 left = Rational(left)
             if isinstance(right, (int, float)):
                 right = Rational(right)
+            if isinstance(left, str):
+                left = String(left)
+            if isinstance(right, str):
+                right = String(right)
+
 
             if node[0] == '+':
+                if isinstance(left, String) or isinstance(right, String):
+                    return str(left) + " + " + str(right)
                 return left + right
             elif node[0] == '-':
+                if isinstance(left, String) or isinstance(right, String):
+                    return str(left) + " - " + str(right)
                 return left - right
             elif node[0] == '*':
+                if isinstance(left, String) or isinstance(right, String):
+                    return str(left) + " * " + str(right)
                 return left * right
             elif node[0] == '/':
+                if isinstance(left, String) or isinstance(right, String):
+                    return str(left) + " / " + str(right)
                 return left / right
             elif node[0] == '**':  # matrix multiplication
                 if isinstance(left, Matrix) and isinstance(right, Matrix):
@@ -29,8 +62,12 @@ class Executer:
                 else:
                     raise Exception("Matrix multiplication is only allowed between two matrices.")
             elif node[0] == '^':
+                if isinstance(left, String) or isinstance(right, String):
+                    return str(left) + " ^ " + str(right)
                 return left ** right
             elif node[0] == '%':
+                if isinstance(left, String) or isinstance(right, String):
+                    return str(left) + " % " + str(right)
                 return left % right
 
         elif isinstance(node, str) and node in user_defined_variables:
@@ -55,6 +92,22 @@ class Executer:
             body = node[3]
             # Tanımlanan fonksiyonu yazdır
             return (f"{function_name}({param}) = {self.expression_from_node(body)}")
+        elif isinstance(node, tuple) and node[0] == 'function_call':
+            function_name = node[1]
+            param = self.execute(node[2])  # Parametreyi çözümle
+            return self.execute_function_call(function_name, param)
+        elif isinstance(node, tuple) and node[0] == 'sin':
+            return sin(self.execute(node[1]))
+        elif isinstance(node, tuple) and node[0] == 'cos':
+            return cos(self.execute(node[1]))
+        elif isinstance(node, tuple) and node[0] == 'tan':
+            return tan(self.execute(node[1]))
+        elif isinstance(node, tuple) and node[0] == 'cot':
+            return 1.0 / tan(self.execute(node[1]))
+        elif isinstance(node, tuple) and node[0] == 'sqrt':
+            return sqrt(self.execute(node[1]))
+        elif isinstance(node, tuple) and node[0] == 'abs':
+            return _abs(self.execute(node[1]))
         else:
             return node  # Sayı, Imaginary, Matrix, Rational ya da değişken olursa olduğu gibi döndür
 
@@ -72,3 +125,17 @@ class Executer:
             elif node[0] == 'imaginary':
                 return str(node[1])  # Imaginary türünü string olarak döndür
         return str(node)  # Diğer türleri olduğu gibi döndür
+    
+
+    def execute_function_call(self, function_name, param):
+        # Fonksiyon çağrısını yürüt
+        if function_name not in user_defined_functions:
+            raise ComputerV2Exception(f"Function {function_name} is not defined.")
+        
+        func_param, func_body = user_defined_functions[function_name]
+        
+        # Parametreyi geçici olarak değişkenlere ekleyin
+        user_defined_variables[func_param] = param
+        
+        # Gövdeyi yürütün
+        return self.execute(func_body)

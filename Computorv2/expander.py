@@ -1,5 +1,7 @@
 from .exceptions import ComputerV2Exception
 from .globals import user_defined_functions, user_defined_variables
+from math import sin, cos, tan, sqrt
+from .my_math import _abs
 
 class Expander:
     def __init__(self):
@@ -12,7 +14,7 @@ class Expander:
             if node[1] in user_defined_variables:
                 return user_defined_variables[node[1]]
             else:
-                raise ComputerV2Exception(f"Undefined variable {node[1]}.")
+                return node[1].lower()
         elif node[0] == 'var_assignment':
             # Değişkeni kaydet
             user_defined_variables[node[1]] = self.expand(node[2])
@@ -38,6 +40,18 @@ class Expander:
                 return self.expand(self.substitute(body, param, arg_value))
             else:
                 raise ComputerV2Exception(f"Undefined function {func_name}.")
+        elif node[0] == 'sin':
+            return ('sin', self.expand(node[1]))
+        elif node[0] == 'cos':
+            return ('cos', self.expand(node[1]))
+        elif node[0] == 'tan':
+            return ('tan', self.expand(node[1]))
+        elif node[0] == 'cot':
+            return ('cot', (self.expand(node[1])))
+        elif node[0] == 'sqrt':
+            return ('sqrt', (self.expand(node[1])))
+        elif node[0] == 'abs':
+            return ('abs', (self.expand(node[1])))
         return node
 
     def substitute(self, body, param, value):

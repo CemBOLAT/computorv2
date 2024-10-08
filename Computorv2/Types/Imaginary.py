@@ -11,6 +11,8 @@ class Imaginary:
             return Imaginary(self.real_part + other, self.imag_part)
         elif isinstance(other, Rational):
             return Imaginary(self.real_part + other.value, self.imag_part)
+        elif isinstance(other, str):
+            return str(self) + " + " + other
         raise TypeError("Unsupported operation for Imaginary and non-Imaginary")
 
     def __sub__(self, other):
@@ -20,6 +22,8 @@ class Imaginary:
             return Imaginary(self.real_part - other, self.imag_part)
         elif isinstance(other, Rational):
             return Imaginary(self.real_part - other.value, self.imag_part)
+        elif isinstance(other, str):
+            return str(self) + " - " + other
         raise TypeError("Unsupported operation for Imaginary and non-Imaginary")
 
     def __mul__(self, other):
@@ -31,6 +35,8 @@ class Imaginary:
             return Imaginary(self.real_part * other, self.imag_part * other)
         elif isinstance(other, Rational):
             return Imaginary(self.real_part * other.value, self.imag_part * other.value)
+        elif isinstance(other, str):
+            return str(self) + " * " + other
         raise TypeError("Unsupported operation for Imaginary and non-Imaginary")
 
     def __truediv__(self, other):
@@ -43,6 +49,8 @@ class Imaginary:
             return Imaginary(self.real_part / other, self.imag_part / other)
         elif isinstance(other, Rational):
             return Imaginary(self.real_part / other.value, self.imag_part / other.value)
+        elif isinstance(other, str):
+            return str(self) + " / " + other
         raise TypeError("Unsupported operation for Imaginary and non-Imaginary")
     
     def __pow__(self, other):
@@ -50,6 +58,8 @@ class Imaginary:
             return Imaginary(self.real_part ** other, self.imag_part ** other)
         elif isinstance(other, Rational):
             return Imaginary(self.real_part ** other.value, self.imag_part ** other.value)
+        elif isinstance(other, str):
+            return str(self) + " ^ " + other
         raise TypeError("Unsupported operation for Imaginary and non-Imaginary")
     
     def __eq__(self, other):

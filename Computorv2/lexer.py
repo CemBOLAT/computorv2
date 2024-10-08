@@ -41,6 +41,7 @@ class Lexer():
         close_parenthesis = [TokenType.RPAREN, TokenType.S_RPAREN]
         matrice_operators = [TokenType.OP_COLON, TokenType.OP_SEMICOLON]
         imaginary = [TokenType.IMAGINARY]
+        trigo_functions = [TokenType.KW_SIN, TokenType.KW_COS, TokenType.KW_TAN, TokenType.KW_COT, TokenType.KW_SQRT, TokenType.KW_ABS]
 
         for i, (token, token_type) in enumerate(self.tokens):
             if token_type in open_parenthesis:
@@ -51,6 +52,14 @@ class Lexer():
                 if (token_type == TokenType.RPAREN and stack[-1] != TokenType.LPAREN) or (token_type == TokenType.S_RPAREN and stack[-1] != TokenType.S_LPAREN):
                     raise ComputerV2Exception(f"Unmatched parenthesis at token {token}.")
                 stack.pop()
+            elif token_type == TokenType.KW_LIST:
+                if len(self.tokens) != 1:
+                    raise ComputerV2Exception(f"Listing variables must be alone on command!")
+            elif token_type == TokenType.KW_PRINT_HISTORY:
+                if not len(self.tokens) < 2:
+                    raise ComputerV2Exception(f"Listing history must have maximum 1 argument!")
+                elif len(self.tokens) !=1 and (not self.tokens[1][1] == TokenType.INTEGER):
+                    raise ComputerV2Exception(f"Listing history must have an integer argument!")
             elif token_type == TokenType.SIGN_EQUAL:
                 equalSign += 1
                 if i == 0:
@@ -103,7 +112,11 @@ class Lexer():
                 #Bir önceki token bir tip ise, tip ile imaginary arasına * işareti ekle
                 if i > 0 and self.tokens[i - 1][1] in types:
                     self.tokens.insert(i, ("*", TokenType.OP_MULTIPLY))
-            
+            elif token_type in trigo_functions:
+                # Trigonometrik fonksiyonun hemen arkasında açık parantez olmalı
+                if i == len(self.tokens) - 1 or self.tokens[i + 1][1] != TokenType.LPAREN:
+                    raise ComputerV2Exception(f"Invalid token after trigonometric function {token}.")
+                
         # Tek bir eşittir ve soru işareti olmalı
         if equalSign > 1:
             raise ComputerV2Exception("Multiple equal signs are not allowed.")
