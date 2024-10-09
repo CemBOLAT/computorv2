@@ -19,7 +19,7 @@ class Parser:
 
     def parse(self):
         # İlk olarak var<id> = <expression>, <id> = <expression> ya da <expression> olup olmadığını kontrol et
-        if self.tokens[self.pos][1] == TokenType.KW_VAR:
+        if len(self.tokens) > self.pos + 2 and self.tokens[self.pos][1] == TokenType.KW_VAR and self.tokens[self.pos + 1][1] == TokenType.IDENTIFIER and self.tokens[self.pos + 2][1] == TokenType.SIGN_EQUAL:
             return self.parse_var_assignment()
         elif self.tokens[self.pos][1] == TokenType.IDENTIFIER and self.peek_next_token_type() == TokenType.SIGN_EQUAL:
             return self.parse_assignment()
@@ -49,7 +49,6 @@ class Parser:
                 variable_tuple = user_defined_functions[self.tokens[self.pos + 1][0]]
                 tuple_creation = ('function_def', key, variable_tuple[0], variable_tuple[1])
                 return tuple_creation
-            
         else:
             return self.parse_expression()
         
@@ -360,6 +359,26 @@ class Parser:
                 raise ComputerV2Exception("Expected ')' after expression.")
             self.pos += 1
             return ('sin', expr)
+        elif token_type == TokenType.KW_RAD:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'sin' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('rad', expr)
+        elif token_type == TokenType.KW_EXP:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'sin' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('exp', expr)
         elif token_type == TokenType.KW_COS:
             self.pos += 1
             if self.pos >= len(self.tokens):

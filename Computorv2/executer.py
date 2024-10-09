@@ -6,6 +6,7 @@ from .globals import user_defined_variables, user_defined_functions
 from .exceptions import ComputerV2Exception
 from math import sin, cos, tan, sqrt
 from .my_math import _abs
+import math
 
 class Executer:
     def execute(self, node):
@@ -100,8 +101,21 @@ class Executer:
             result = self.execute(node[1])
             if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
                 raise ComputerV2Exception(f"Invalid argument for sin function: {result}")
-            print("type of result: ", type(result))
             return sin(result)
+        elif isinstance(node, tuple) and node[0] == 'exp':
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for exp function: {result}")
+            # take exponential like result is 4 than e^4
+            e = Rational(2.718281828459045)
+            return e ** result
+        elif isinstance(node, tuple) and node[0] == 'rad':
+            result = self.execute(node[1])
+            if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
+                raise ComputerV2Exception(f"Invalid argument for exp function: {result}")
+            # convert angle to radian
+            result_in_radians = (result * math.pi) / 180.0
+            return result_in_radians
         elif isinstance(node, tuple) and node[0] == 'cos':
             result = self.execute(node[1])
             if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):

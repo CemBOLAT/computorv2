@@ -41,7 +41,7 @@ class Lexer():
         close_parenthesis = [TokenType.RPAREN, TokenType.S_RPAREN]
         matrice_operators = [TokenType.OP_COLON, TokenType.OP_SEMICOLON]
         imaginary = [TokenType.IMAGINARY]
-        trigo_functions = [TokenType.KW_SIN, TokenType.KW_COS, TokenType.KW_TAN, TokenType.KW_COT, TokenType.KW_SQRT, TokenType.KW_ABS]
+        one_param_funcs = [TokenType.KW_SIN, TokenType.KW_COS, TokenType.KW_TAN, TokenType.KW_COT, TokenType.KW_SQRT, TokenType.KW_ABS, TokenType.KW_EXP, TokenType.KW_RAD]
 
         for i, (token, token_type) in enumerate(self.tokens):
             if token_type in open_parenthesis:
@@ -112,7 +112,7 @@ class Lexer():
                 #Bir önceki token bir tip ise, tip ile imaginary arasına * işareti ekle
                 if i > 0 and self.tokens[i - 1][1] in types:
                     self.tokens.insert(i, ("*", TokenType.OP_MULTIPLY))
-            elif token_type in trigo_functions:
+            elif token_type in one_param_funcs:
                 # Trigonometrik fonksiyonun hemen arkasında açık parantez olmalı
                 if i == len(self.tokens) - 1 or self.tokens[i + 1][1] != TokenType.LPAREN:
                     raise ComputerV2Exception(f"Invalid token after trigonometric function {token}.")

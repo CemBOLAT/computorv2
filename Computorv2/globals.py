@@ -33,6 +33,8 @@ class TokenType(Enum):
     KW_COT = auto()
     KW_SQRT = auto()
     KW_ABS = auto()
+    KW_EXP = auto()
+    KW_RAD = auto()
 
 token_patterns = [
     (r":history", TokenType.KW_PRINT_HISTORY),
@@ -43,6 +45,8 @@ token_patterns = [
     (r"sin", TokenType.KW_SIN),
     (r"sqrt", TokenType.KW_SQRT),
     (r"abs", TokenType.KW_ABS),
+    (r"exp", TokenType.KW_EXP),
+    (r"rad", TokenType.KW_RAD),
     (r"\*\*", TokenType.OP_MATRICE_MULTIPLY),
     (r"i", TokenType.IMAGINARY),
     (r"var", TokenType.KW_VAR),
