@@ -56,6 +56,8 @@ class Expander:
             return ('exp', (self.expand(node[1])))
         elif node[0] == 'rad':
             return ('rad', (self.expand(node[1])))
+        elif node[0] == 'display':
+            return ('display', self.expand(node[1]))
         return node
 
     def substitute(self, body, param, value):

@@ -409,6 +409,16 @@ class Parser:
                 raise ComputerV2Exception("Expected ')' after expression.")
             self.pos += 1
             return ('cot', expr)
+        elif token_type == TokenType.KW_DISPLAY:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                raise ComputerV2Exception("Expected '(' after 'display' keyword.")
+            self.pos += 1
+            expr = self.parse_expression()
+            if self.tokens[self.pos][1] != TokenType.RPAREN:
+                raise ComputerV2Exception("Expected ')' after expression.")
+            self.pos += 1
+            return ('display', expr)
         elif token_type == TokenType.KW_SQRT:
             self.pos += 1
             if self.pos >= len(self.tokens):
@@ -419,6 +429,7 @@ class Parser:
                 raise ComputerV2Exception("Expected ')' after expression.")
             self.pos += 1
             return ('sqrt', expr)
+        
         elif token_type == TokenType.KW_ABS:
             self.pos += 1
             if self.pos >= len(self.tokens):
@@ -429,6 +440,16 @@ class Parser:
                 raise ComputerV2Exception("Expected ')' after expression.")
             self.pos += 1
             return ('abs', expr)
+        elif token_type == TokenType.KW_PRINT_HISTORY:
+            self.pos += 1
+            if self.pos >= len(self.tokens):
+                return ('print_history', 1)
+            elif self.tokens[self.pos][1] != TokenType.INTEGER:
+                raise ComputerV2Exception("Expected integer after 'print_history' keyword.")
+            else:
+                number = int(self.tokens[self.pos][0])
+                self.pos += 1
+                return ('print_history', number)
         else:
             raise ComputerV2Exception(f"Unexpected token {token}.")
     
@@ -444,10 +465,16 @@ def print_whole_history(number_of_history:int):
     #     str_history = file.read()
     
     # read last number_of_history lines
-    with open(".computorv2_history_result", "r") as file:
-        lines = file.readlines()
-        for line in lines[-number_of_history:]:
-            str_history += line
+    # eğer dosya yoksa dosya oluştur
+    try:
+        with open(".computorv2_history_result", "r") as file:
+            lines = file.readlines()
+            for line in lines[-number_of_history:]:
+                str_history += line
+    except FileNotFoundError:
+        with open(".computorv2_history_result", "w") as file:
+            file.write("No history found.\n")
+            return "No history found."
 
     return str_history
 

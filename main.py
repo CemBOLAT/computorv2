@@ -7,6 +7,11 @@ from prompt_toolkit.history import FileHistory
 from TextEditor.TextEditor import TextEditor
 from Computorv2.parser import parser
 
+def print_txt_to_file(result, text):
+	if result:
+		with open('.computorv2_history_result', 'a') as f:
+			f.write(f"{text} = {result}\n")
+
 def main(prompt_session):
 
 	if len(sys.argv) > 1:
@@ -40,6 +45,7 @@ def main(prompt_session):
 			try:
 				if (text):
 					result = parser(text)
+					print_txt_to_file(result, text)
 					if result:
 						TextEditor.print_colored(result, TextEditor.COLORS['green'])
 

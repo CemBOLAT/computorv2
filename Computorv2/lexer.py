@@ -56,7 +56,7 @@ class Lexer():
                 if len(self.tokens) != 1:
                     raise ComputerV2Exception(f"Listing variables must be alone on command!")
             elif token_type == TokenType.KW_PRINT_HISTORY:
-                if not len(self.tokens) < 2:
+                if not len(self.tokens) <= 2:
                     raise ComputerV2Exception(f"Listing history must have maximum 1 argument!")
                 elif len(self.tokens) !=1 and (not self.tokens[1][1] == TokenType.INTEGER):
                     raise ComputerV2Exception(f"Listing history must have an integer argument!")

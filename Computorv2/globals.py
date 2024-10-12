@@ -35,10 +35,12 @@ class TokenType(Enum):
     KW_ABS = auto()
     KW_EXP = auto()
     KW_RAD = auto()
+    KW_DISPLAY = auto()
 
 token_patterns = [
     (r":history", TokenType.KW_PRINT_HISTORY),
     (r":list", TokenType.KW_LIST),
+    (r"display", TokenType.KW_DISPLAY),
     (r"cot", TokenType.KW_COT),
     (r"tan", TokenType.KW_TAN),
     (r"cos", TokenType.KW_COS),

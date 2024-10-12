@@ -7,6 +7,8 @@ from .exceptions import ComputerV2Exception
 from math import sin, cos, tan, sqrt
 from .my_math import _abs
 import math
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Executer:
     def execute(self, node):
@@ -92,7 +94,7 @@ class Executer:
             param = node[2]
             body = node[3]
             # Tanımlanan fonksiyonu yazdır
-            return (f"{function_name}({param}) = {self.expression_from_node(body)}")
+            return (f"{function_name}({param}) = {self.expression_from_node(body,param)}")
         elif isinstance(node, tuple) and node[0] == 'function_call':
             function_name = node[1]
             param = self.execute(node[2])  # Parametreyi çözümle
@@ -143,19 +145,79 @@ class Executer:
             if (not isinstance(result, (int, float))) and (not isinstance(result, Rational)):
                 raise ComputerV2Exception(f"Invalid argument for abs function: {result}")
             return _abs(result)
+        elif isinstance(node, tuple) and node[0] == 'display':
+            self.display_function_curve(node[1])
+            return None
         else:
             return node  # Sayı, Imaginary, Matrix, Rational ya da değişken olursa olduğu gibi döndür
 
-    def expression_from_node(self, node):
+    def display_function_curve(self, result):
+        x = np.linspace(-10, 10, 100)  # x değerleri aralığı
+        y = []  # y değerlerini tutacak liste
+
+        if isinstance(result, tuple):
+            # Her bir x için y değerini hesapla
+            for each_x in x:
+                # result içindeki x değerini değiştir
+                replaced_result = self.evaluate_expression(result, each_x)
+                # replace işleminden sonra sonucu hesapla
+                y_value = self.execute(replaced_result)
+                y.append(y_value)
+        else:
+            # Sabit bir sayı ise her x için aynı y değerini kullan
+            y = [result for i in x]
+
+        plt.plot(x, y)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Function Curve')
+        plt.show()
+
+
+    def evaluate_expression(self, expression, x_value=None):
+        # Basit bir şekilde, tuple halindeki matematiksel ifadeyi değerlendir.
+        if isinstance(expression, tuple):
+            operator, left, right = expression
+
+            # İlk olarak sol ve sağ tarafları çözüyoruz
+            left_val = self.evaluate_expression(left, x_value) if isinstance(left, tuple) else left
+            right_val = self.evaluate_expression(right, x_value) if isinstance(right, tuple) else right
+
+            if isinstance(left_val, str):
+                left_val = x_value
+            if isinstance(right_val, str):
+                right_val = x_value
+
+
+            # Son olarak operatörü uygula
+            if operator == '+':
+                return left_val + right_val
+            elif operator == '-':
+                return left_val - right_val
+            elif operator == '*':
+                return left_val * right_val
+            elif operator == '/':
+                return left_val / right_val
+            elif operator == '^':
+                return left_val ** right_val
+        elif isinstance(expression, str):
+            return x_value
+    
+    def expression_from_node(self, node, param=None):
         """ Node yapısından ifadenin string temsiline dönüşüm yapar. """
         if isinstance(node, tuple):
             if node[0] == 'binary_op':
-                left = self.expression_from_node(node[2])
-                right = self.expression_from_node(node[3])
+                left = self.expression_from_node(node[2], param)
+                right = self.expression_from_node(node[3], param)
                 return f"({left} {node[1]} {right})"
             elif node[0] == 'num':
                 return str(node[1])
             elif node[0] == 'var':
+                if param and node[1] != param:
+                    if (node[1] not in user_defined_variables.keys()):
+                        raise ComputerV2Exception(f"Undefined variable {node[1]}.")
+                    else:
+                        return str(user_defined_variables[node[1]])
                 return node[1]
             elif node[0] == 'imaginary':
                 return str(node[1])  # Imaginary türünü string olarak döndür
